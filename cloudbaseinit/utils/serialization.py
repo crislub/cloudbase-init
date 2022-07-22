@@ -26,11 +26,9 @@ def parse_json_yaml(raw_data):
 
     try:
         return json.loads(raw_data)
-    except (TypeError, ValueError, AttributeError,
-            json.decoder.JSONDecodeError):
+    except (TypeError, ValueError, AttributeError):
         loader = getattr(yaml, 'CLoader', yaml.Loader)
         try:
             return yaml.load(raw_data, Loader=loader)
-        except (TypeError, ValueError, AttributeError,
-                yaml.parser.ParserError, yaml.scanner.ScannerError):
+        except (TypeError, ValueError, AttributeError):
             raise YamlParserConfigError("Invalid yaml data provided.")

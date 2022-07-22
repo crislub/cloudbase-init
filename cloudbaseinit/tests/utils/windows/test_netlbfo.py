@@ -41,7 +41,6 @@ class NetLBFOTest(unittest.TestCase):
     def tearDown(self):
         self._module_patcher.stop()
 
-    @mock.patch('time.sleep')
     @mock.patch(MODPATH + '.NetLBFOTeamManager._get_primary_adapter_name')
     @mock.patch(MODPATH + '.NetLBFOTeamManager._create_team')
     @mock.patch(MODPATH + '.NetLBFOTeamManager._add_team_member')
@@ -50,11 +49,10 @@ class NetLBFOTest(unittest.TestCase):
     @mock.patch(MODPATH + '.NetLBFOTeamManager.delete_team')
     def _test_create_team(self, mock_delete_team, mock_wait_for_nic,
                           mock_set_primary_nic_vlan_id, mock_add_team_member,
-                          mock_create_team, mock_primary_adapter_name,
-                          mock_time_sleep, mode_not_found=False,
-                          lb_algo_not_found=False,
+                          mock_create_team, mock_get_primary_adapter_name,
+                          mode_not_found=False, lb_algo_not_found=False,
                           add_team_member_fail=False):
-        mock_primary_adapter_name.return_value = mock.sentinel.pri_nic_name
+        mock_get_primary_adapter_name.return_value = mock.sentinel.pri_nic_name
         mock_create_team.return_value = None
 
         lacp_timer = network_model.BOND_LACP_RATE_FAST
@@ -102,6 +100,9 @@ class NetLBFOTest(unittest.TestCase):
                 mock.sentinel.mac, mock.sentinel.pri_nic_name,
                 mock.sentinel.vlan_id, lacp_timer)
 
+        mock_add_team_member.assert_called_once_with(
+            conn, mock.sentinel.team_name, mock.sentinel.other_member)
+
         if not add_team_member_fail:
             mock_set_primary_nic_vlan_id.assert_called_once_with(
                 conn, mock.sentinel.team_name, mock.sentinel.vlan_id)
@@ -110,14 +111,8 @@ class NetLBFOTest(unittest.TestCase):
                 2, 3, mock.sentinel.pri_nic_name, 1)
             mock_wait_for_nic.assert_called_once_with(
                 mock_team_nic.Name)
-            mock_add_team_member.assert_called_once_with(
-                conn, mock.sentinel.team_name, mock.sentinel.other_member)
         else:
-            mock_add_team_member.assert_called_with(
-                conn, mock.sentinel.team_name, mock.sentinel.other_member)
-            mock_delete_team.assert_called_with(mock.sentinel.team_name)
-            self.assertEqual(mock_add_team_member.call_count, 6)
-            self.assertEqual(mock_delete_team.call_count, 6)
+            mock_delete_team.assert_called_once_with(mock.sentinel.team_name)
 
     def test_create_team(self):
         self._test_create_team()

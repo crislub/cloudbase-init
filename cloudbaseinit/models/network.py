@@ -54,10 +54,6 @@ AVAILABLE_BOND_LB_ALGORITHMS = [
 BOND_LACP_RATE_SLOW = "slow"
 BOND_LACP_RATE_FAST = "fast"
 
-AVAILABLE_BOND_LACP_RATES = [
-    BOND_LACP_RATE_SLOW,
-    BOND_LACP_RATE_FAST
-]
 
 NetworkDetails = collections.namedtuple(
     "NetworkDetails",

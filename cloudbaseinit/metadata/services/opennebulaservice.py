@@ -88,14 +88,12 @@ class OpenNebulaService(base.BaseMetadataService):
         new_content = sep.join(lines)
         # get pairs
         pairs = {}
-        pattern = (br"(?P<key>\w+)=((?P<int_value>\d+)|"
-                   br"['\"](?P<str_value>[\s\S]*?)['\"])(?=\s+\w+=)")
+        pattern = (br"(?P<key>\w+)=(['\"](?P<str_value>[\s\S]+?)['\"]|"
+                   br"(?P<int_value>\d+))(?=\s+\w+=)")
         for match in re.finditer(pattern, new_content):
             key = encoding.get_as_string(match.group("key"))
-            val = match.group("str_value")
-            if match.group("int_value"):
-                val = int(match.group("int_value"))
-            pairs[key] = val
+            pairs[key] = (match.group("str_value") or
+                          int(match.group("int_value")))
         return pairs
 
     @staticmethod
